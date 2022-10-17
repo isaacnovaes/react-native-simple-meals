@@ -62,7 +62,7 @@ module.exports = {
         '@typescript-eslint/no-useless-empty-export': 'warn',
         'no-redeclare': 'off',
         '@typescript-eslint/no-redeclare': 'warn', // overwrite base no-redeclare eslint
-        'no-shadow': ['error', { hoist: 'all' }],
+        'no-shadow': 'off',
         '@typescript-eslint/no-shadow': ['error', { hoist: 'all' }], // overwrite base no-shadow eslint
         'no-unused-expressions': 'off',
         '@typescript-eslint/no-unused-expressions': 'warn', // overwrite base no-unused-expressions eslint
