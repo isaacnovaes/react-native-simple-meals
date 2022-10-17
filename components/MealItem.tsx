@@ -1,4 +1,14 @@
-import { Text, View, Pressable, Image, StyleSheet } from 'react-native';
+import { useState, useRef } from 'react';
+import {
+    Text,
+    View,
+    Pressable,
+    Image,
+    StyleSheet,
+    Animated,
+    Easing,
+} from 'react-native';
+import { AntDesign } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type Meal from '../models/meal';
 import type { ScreenStackMealsOverViewNavigationProp } from '../types/common';
@@ -28,9 +38,14 @@ const styles = StyleSheet.create({
     pressed: {
         opacity: 0.7,
     },
-    image: {
+    imageContainer: {
         width: '100%',
         height: 200,
+        backgroundColor: '#ccc',
+    },
+    image: {
+        width: '100%',
+        height: '100%',
     },
 });
 
@@ -38,6 +53,27 @@ const MealItem = (props: { meal: Meal }) => {
     const { meal } = props;
 
     const navigation = useNavigation<ScreenStackMealsOverViewNavigationProp>();
+
+    const [loadStatus, setLoadStatus] = useState<'loadStart' | 'loadFinish'>(
+        'loadStart'
+    );
+
+    const spinValue = useRef(new Animated.Value(0)).current;
+
+    Animated.loop(
+        Animated.timing(spinValue, {
+            toValue: 1,
+            duration: 300,
+            easing: Easing.linear,
+            useNativeDriver: true,
+        })
+    ).start();
+
+    const spin = spinValue.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['0deg', '360deg'],
+    });
+
     return (
         <View style={styles.mealItem}>
             <Pressable
@@ -51,10 +87,39 @@ const MealItem = (props: { meal: Meal }) => {
                 }}
             >
                 <View>
-                    <Image
-                        source={{ uri: meal.imageUrl }}
-                        style={styles.image}
-                    />
+                    <View style={styles.imageContainer}>
+                        {loadStatus === 'loadStart' ? (
+                            <Animated.View
+                                style={{
+                                    transform: [{ rotate: spin }],
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    zIndex: 2,
+                                    marginTop: 100,
+                                }}
+                            >
+                                <AntDesign
+                                    name='loading2'
+                                    size={24}
+                                    color='#351401'
+                                />
+                            </Animated.View>
+                        ) : null}
+                        <Image
+                            source={{ uri: meal.imageUrl }}
+                            style={[
+                                styles.image,
+                                {
+                                    opacity: loadStatus === 'loadStart' ? 0 : 1,
+                                },
+                            ]}
+                            onLoadEnd={() => {
+                                setTimeout(() => {
+                                    setLoadStatus('loadFinish');
+                                }, 100);
+                            }}
+                        />
+                    </View>
                     <Text style={styles.title}>{meal.title}</Text>
                 </View>
                 <MealDetails

@@ -1,9 +1,9 @@
 import { FlatList } from 'react-native';
 import CategoryGridTile from '../components/CategoryGridTile';
 import { CATEGORIES } from '../data/dummy-data';
-import type { ScreenStackCategoriesProps } from '../types/common';
+import type { CategoryDrawerScreenProps } from '../types/common';
 
-const CategoriesScreen = ({ navigation }: ScreenStackCategoriesProps) => {
+const CategoriesScreen = ({ navigation }: CategoryDrawerScreenProps) => {
     return (
         <FlatList
             data={CATEGORIES}

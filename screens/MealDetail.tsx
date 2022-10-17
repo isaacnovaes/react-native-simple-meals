@@ -1,16 +1,17 @@
-import {
-    ScrollView,
-    View,
-    Text,
-    Button,
-    Image,
-    StyleSheet,
-} from 'react-native';
+import { useContext, useEffect } from 'react';
+import { ScrollView, View, Text, Image, StyleSheet } from 'react-native';
+import List from '../components/MealDetail/List';
+import Subtitle from '../components/MealDetail/Subtitle';
 import MealDetails from '../components/MealDetails';
 import { MEALS } from '../data/dummy-data';
+import RightHeader from '../components/RightHeader';
 import type { ScreenStackMealsDetailProps } from '../types/common';
+import { Context } from '../context/ContextProvider';
 
 const styles = StyleSheet.create({
+    rootContainer: {
+        marginBottom: 20,
+    },
     image: {
         width: '100%',
         height: 350,
@@ -25,18 +26,6 @@ const styles = StyleSheet.create({
     detailText: {
         color: '#fff',
     },
-    subtitleContainer: {
-        borderBottomColor: '#fff',
-        borderBottomWidth: 2,
-        padding: 6,
-        margin: 4,
-    },
-    subtitle: {
-        color: '#fff',
-        fontSize: 18,
-        fontWeight: 'bold',
-        textAlign: 'center',
-    },
 });
 
 const MealDetail = (props: ScreenStackMealsDetailProps) => {
@@ -45,12 +34,46 @@ const MealDetail = (props: ScreenStackMealsDetailProps) => {
         navigation,
     } = props;
 
+    const {
+        state: { favoriteMealsID },
+        dispatch,
+    } = useContext(Context);
+
+    const isMealFavorite = favoriteMealsID.includes(params.mealID);
+
     const selectedMeal = MEALS.find((meal) => meal.id === params.mealID);
+
+    const selectedMealID = selectedMeal?.id ?? '';
+
+    useEffect(() => {
+        navigation.setOptions({
+            title: 'Meal Detail',
+            // eslint-disable-next-line react/no-unstable-nested-components
+            headerRight: () => (
+                <RightHeader
+                    onPress={() => {
+                        if (isMealFavorite) {
+                            dispatch({
+                                type: 'REMOVE_MEAL',
+                                mealID: selectedMealID,
+                            });
+                        } else {
+                            dispatch({
+                                type: 'ADD_MEAL',
+                                mealID: selectedMealID,
+                            });
+                        }
+                    }}
+                    isMealFavorite={isMealFavorite}
+                />
+            ),
+        });
+    }, [dispatch, isMealFavorite, navigation, selectedMealID]);
 
     if (!selectedMeal) return <Text>Meal not found</Text>;
 
     return (
-        <ScrollView>
+        <ScrollView style={styles.rootContainer}>
             <Image
                 source={{ uri: selectedMeal.imageUrl }}
                 style={styles.image}
@@ -62,22 +85,14 @@ const MealDetail = (props: ScreenStackMealsDetailProps) => {
                 affordability={selectedMeal.affordability}
                 textStyle={styles.detailText}
             />
-            <View style={styles.subtitleContainer}>
-                <Text style={styles.subtitle}>Ingredients</Text>
+            <View style={{ alignItems: 'center' }}>
+                <View style={{ maxWidth: '80%' }}>
+                    <Subtitle title='Ingredients' />
+                    <List list={selectedMeal.ingredients} />
+                    <Subtitle title='Steps' />
+                    <List list={selectedMeal.steps} />
+                </View>
             </View>
-            {selectedMeal.ingredients.map((ingredient) => (
-                <Text key={ingredient}>{ingredient}</Text>
-            ))}
-            <View style={styles.subtitleContainer}>
-                <Text style={styles.subtitle}>Steps</Text>
-            </View>
-            {selectedMeal.steps.map((step) => (
-                <Text key={step}>{step}</Text>
-            ))}
-            <Button
-                title='Go to Categories'
-                onPress={() => navigation.popToTop()}
-            />
         </ScrollView>
     );
 };
