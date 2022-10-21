@@ -19,6 +19,7 @@ export type ScreenStackMealsOverViewProps = NativeStackScreenProps<
     'Meals'
 >;
 
+// typing for useNavigation hook
 export type ScreenStackMealsOverViewNavigationProp =
     ScreenStackMealsOverViewProps['navigation'];
 
